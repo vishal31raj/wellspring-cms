@@ -24,10 +24,6 @@ const Creator = sequelize.define("creator", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-  profileImgUrl: {
-    type: Sequelize.STRING,
-    allowNull: true,
-  },
 });
 
 module.exports = Creator;

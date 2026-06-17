@@ -101,7 +101,9 @@ exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    const creator = await Creator.findByPk(req.creator.id);
+    const creator = await await Creator.findOne({
+      where: { id: req.creator.id },
+    });
     if (!creator) {
       return res.status(404).json({
         message: "Creator not found",
@@ -126,11 +128,11 @@ exports.changePassword = async (req, res) => {
 
     await creator.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Password updated successfully",
     });
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       error: err.message,
     });
   }

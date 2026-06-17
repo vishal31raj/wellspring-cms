@@ -11,11 +11,13 @@ require("./models/associations");
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
+const programRoutes = require("./routes/program.routes");
 
 const app = express();
 app.use(express.json());
 
 app.use("/auth", authRoutes);
+app.use("/programs", programRoutes);
 
 sequelize
   .authenticate()
