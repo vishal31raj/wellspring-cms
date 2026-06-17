@@ -1,3 +1,4 @@
+const { fn, col } = require("sequelize");
 const Program = require("../models/program.model");
 const Session = require("../models/session.model");
 
@@ -37,6 +38,19 @@ exports.getAllPrograms = async (req, res) => {
 
     const programs = await Program.findAll({
       where: { creatorId },
+      attributes: [
+        "id",
+        "title",
+        "createdAt",
+        [fn("COUNT", col("sessions.id")), "sessionsCount"],
+      ],
+      include: [
+        {
+          model: Session,
+          attributes: [],
+        },
+      ],
+      group: ["program.id"],
       order: [["createdAt", "DESC"]],
     });
 

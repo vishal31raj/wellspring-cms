@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 require("dotenv").config({ quiet: true });
 
 const sequelize = require("./utils/database");
@@ -15,6 +16,15 @@ const programRoutes = require("./routes/program.routes");
 const sessionRoutes = require("./routes/session.routes");
 
 const app = express();
+
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://192.168.1.2:3000"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 app.use("/auth", authRoutes);

@@ -69,6 +69,7 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
+      c_id: creator.id,
       token,
     });
   } catch (err) {
@@ -80,6 +81,7 @@ exports.getProfile = async (req, res) => {
   try {
     const creator = await Creator.findOne({
       where: { id: req.creator.id },
+      attributes: { exclude: ["password"] },
     });
 
     if (!creator) {

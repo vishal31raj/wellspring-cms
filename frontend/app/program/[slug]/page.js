@@ -1,0 +1,372 @@
+"use client";
+
+import SessionCard from "@/components/session-card";
+import {
+  deleteProgram,
+  editProgram,
+  getProgram,
+} from "@/services/programs.api";
+import { createSession } from "@/services/sessions.api";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
+export default function ProgramDetailsPage({ params }) {
+  const router = useRouter();
+  const { slug } = use(params);
+
+  const [programDetails, setProgramDetails] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+
+  const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
+  const [sessionData, setSessionData] = useState({
+    title: "",
+    duration: "",
+    position: "",
+    instructorName: "",
+    tags: "", // This will take user text (e.g., "sleep, beginner") and transform to array on submit
+    mediaFileUrl: "",
+    type: "video", // Default value for the dropdown
+  });
+
+  const fetchProgramDetails = async () => {
+    try {
+      const result = await getProgram(slug);
+      setProgramDetails(result.data);
+      console.log("Program details:", result.data);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchProgramDetails();
+  }, [slug]);
+
+  const handleOpenEditModal = () => {
+    setEditTitle(programDetails?.title);
+    setShowEditModal(true);
+  };
+
+  // Submit the updated title
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Passes the id/slug along with the new payload body
+      const result = await editProgram(slug, { title: editTitle });
+
+      toast.success(result.message);
+      setShowEditModal(false);
+
+      // Refresh details on screen immediately without reloading the page
+      await fetchProgramDetails();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleDeleteModal = async () => {
+    try {
+      const result = await deleteProgram(slug);
+      toast.success(result.message);
+      router.back();
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleSessionInputChange = (e) => {
+    const { name, value } = e.target;
+    setSessionData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Submit Handler for New Session Creation
+  const handleSessionSubmit = async (e) => {
+    e.preventDefault();
+
+    if (Number(sessionData.position) !== programDetails.sessions.length + 1) {
+      toast.error(`Position should be ${programDetails.sessions.length + 1}`);
+      return;
+    }
+
+    try {
+      // Formats data payloads into corresponding requested schema types
+      const payload = {
+        title: sessionData.title,
+        duration: Number(sessionData.duration), // Ensures Integer conversion
+        position: Number(sessionData.position), // Ensures Integer conversion
+        instructorName: sessionData.instructorName,
+        // Splits text string inputs by comma and strips white spaces cleanly
+        tags: sessionData.tags
+          ? sessionData.tags
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean)
+          : [],
+        mediaFileUrl: sessionData.mediaFileUrl,
+        type: sessionData.type,
+      };
+
+      console.log(slug, payload);
+
+      const result = await createSession(slug, payload);
+      toast.success(result.message || "Session created successfully!");
+
+      setSessionData({
+        title: "",
+        duration: "",
+        position: "",
+        instructorName: "",
+        tags: "",
+        mediaFileUrl: "",
+        type: "video",
+      });
+      setShowCreateSessionModal(false);
+      await fetchProgramDetails();
+    } catch (error) {
+      toast.error(error.message || "Failed to create session");
+    }
+  };
+
+  return (
+    <main className="p-5">
+      {programDetails && (
+        <div className="flex flex-row items-center justify-between mb-6">
+          <button
+            onClick={() => router.back()}
+            className="mb-4 flex items-center gap-2 text-sm text-blue-600 hover:underline"
+          >
+            ← Back
+          </button>
+          <h1 className="text-2xl font-bold">{programDetails.title}</h1>
+          <div className="flex flex-row items-center gap-3 whitespace-nowrap">
+            <button
+              onClick={handleOpenEditModal}
+              className="px-3 rounded-md bg-blue-600 py-2 text-white text-sm hover:bg-blue-700"
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleDeleteModal}
+              className="px-3 rounded-md bg-red-600 py-2 text-white text-sm hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      {programDetails && (
+        <div className="mb-6">
+          <p className="text-md mb-3">Sessions:</p>
+          {programDetails.sessions.length ? (
+            <div className="">
+              {programDetails.sessions.map((session) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center">
+              <p className="text-sm text-zinc-500 mb-3">No sessions yet!</p>
+            </div>
+          )}
+          <div className="text-center my-3">
+            <button
+              onClick={() => setShowCreateSessionModal(true)}
+              className="px-3 rounded-md border-1 border-dashed border-blue-600 bg-transparent py-2 text-blue-600 text-sm hover:bg-blue-50 transition-colors"
+            >
+              + Create new session
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            {/* Modal Header */}
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold">Edit Program</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-xl font-bold hover:cursor-pointer p-1"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  required
+                  placeholder="Enter new program title"
+                  className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              {/* Action Buttons inside Form */}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:bg-blue-400 hover:cursor-pointer"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showCreateSessionModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 overflow-y-auto p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg my-auto">
+            {/* Modal Header */}
+            <div className="mb-4 flex items-center justify-between border-b pb-2">
+              <h2 className="text-xl font-bold text-zinc-800">
+                Create New Session
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowCreateSessionModal(false)}
+                className="text-2xl font-semibold hover:cursor-pointer p-1 text-zinc-400 hover:text-zinc-600"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSessionSubmit} className="space-y-3">
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={sessionData.title}
+                  onChange={handleSessionInputChange}
+                  required
+                  placeholder="eg: How to fix your sleep schedule"
+                  className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                    Duration (in seconds)
+                  </label>
+                  <input
+                    type="number"
+                    name="duration"
+                    value={sessionData.duration}
+                    onChange={handleSessionInputChange}
+                    required
+                    min="1"
+                    placeholder="1500"
+                    className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                    Position Index
+                  </label>
+                  <input
+                    type="number"
+                    name="position"
+                    value={sessionData.position}
+                    onChange={handleSessionInputChange}
+                    required
+                    min="1"
+                    placeholder="2"
+                    className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                  Instructor Name
+                </label>
+                <input
+                  type="text"
+                  name="instructorName"
+                  value={sessionData.instructorName}
+                  onChange={handleSessionInputChange}
+                  required
+                  placeholder="eg: Sarah Johnson"
+                  className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                  Tags (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={sessionData.tags}
+                  onChange={handleSessionInputChange}
+                  placeholder="sleep, beginner, morning"
+                  className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                  Media File URL
+                </label>
+                <input
+                  type="url"
+                  name="mediaFileUrl"
+                  value={sessionData.mediaFileUrl}
+                  onChange={handleSessionInputChange}
+                  required
+                  placeholder="https://example.com/video.mp4"
+                  className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                  Media Type
+                </label>
+                <select
+                  name="type"
+                  value={sessionData.type}
+                  onChange={handleSessionInputChange}
+                  className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm bg-white focus:outline-none focus:border-blue-600"
+                >
+                  <option value="video">Video</option>
+                  <option value="audio">Audio</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t mt-4">
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:bg-blue-400 hover:cursor-pointer font-medium"
+                >
+                  Create Session
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
