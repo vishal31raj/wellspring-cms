@@ -19,7 +19,7 @@ router.post(
 );
 router.get(
   "/",
-  isAuthenticated, 
+  isAuthenticated,
   isAuthorized,
   programController.getAllPrograms,
 );
@@ -28,6 +28,12 @@ router.get(
   isAuthenticated,
   isAuthorized,
   programController.getProgramDetails,
+);
+router.delete(
+  "/:id",
+  isAuthenticated,
+  isAuthorized,
+  programController.deleteProgram,
 );
 router.put(
   "/:id",
