@@ -1,0 +1,14 @@
+# Ignore backend dependencies
+node_modules/
+
+# Ignore backend environment variables and secrets
+.env
+.env.*
+
+# Ignore backend build outputs
+dist/
+build/
+
+# Ignore IDE configuration files
+.vscode/
+.idea/
