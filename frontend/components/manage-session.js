@@ -2,7 +2,8 @@ export default function ManageSession({
   sessionData,
   handleSessionInputChange,
   handleSessionSubmit,
-  setShowCreateSessionModal,
+  onClose,
+  editMode,
 }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 overflow-y-auto p-4">
@@ -10,11 +11,11 @@ export default function ManageSession({
         {/* Modal Header */}
         <div className="mb-4 flex items-center justify-between border-b pb-2">
           <h2 className="text-xl font-bold text-zinc-800">
-            Create New Session
+            {editMode ? "Edit Session" : "Create New Session"}
           </h2>
           <button
             type="button"
-            onClick={() => setShowCreateSessionModal(false)}
+            onClick={onClose}
             className="text-2xl font-semibold hover:cursor-pointer p-1 text-zinc-400 hover:text-zinc-600"
           >
             ×
@@ -62,11 +63,12 @@ export default function ManageSession({
                 type="number"
                 name="position"
                 value={sessionData.position}
+                disabled={editMode}
                 onChange={handleSessionInputChange}
                 required
                 min="1"
                 placeholder="2"
-                className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+                className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600 disabled:bg-zinc-200"
               />
             </div>
           </div>
@@ -135,7 +137,7 @@ export default function ManageSession({
               type="submit"
               className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:bg-blue-400 hover:cursor-pointer font-medium"
             >
-              Create Session
+              {editMode ? "Save Changes" : "Create Session"}
             </button>
           </div>
         </form>

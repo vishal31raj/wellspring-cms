@@ -27,12 +27,8 @@ export default function DashboardPage() {
         getProfile(),
         getPrograms(),
       ]);
-
       setProfile(profileResult.data);
       setPrograms(programsResult.data);
-
-      console.log("Profile:", profileResult);
-      console.log("Programs:", programsResult);
     } catch (error) {
       toast.error(error.message);
     }
@@ -45,6 +41,7 @@ export default function DashboardPage() {
   const handleLogout = () => {
     localStorage.removeItem("c_id");
     localStorage.removeItem("token");
+    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     router.push("/");
   };
 

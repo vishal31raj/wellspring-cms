@@ -118,7 +118,7 @@ exports.updateSession = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: session,
+      message: "Session updated successfully",
     });
   } catch (err) {
     console.error(err);

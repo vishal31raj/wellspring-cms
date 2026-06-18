@@ -44,7 +44,6 @@ export default function ProgramDetailsPage({ params }) {
       const result = await getProgram(slug);
       setProgramDetails(result.data);
       setSessions(result.data.sessions);
-      console.log("Program details:", result.data);
     } catch (error) {
       toast.error(error.message);
     }
@@ -121,8 +120,6 @@ export default function ProgramDetailsPage({ params }) {
         type: sessionData.type,
       };
 
-      console.log(slug, payload);
-
       const result = await createSession(slug, payload);
       toast.success(result.message || "Session created successfully!");
 
@@ -159,8 +156,6 @@ export default function ProgramDetailsPage({ params }) {
       sessionId: session.id,
       newPosition: index + 1,
     }));
-
-    console.log(reorderedPayload);
 
     try {
       const result = await reorderSessions(programDetails.id, reorderedPayload);
@@ -289,7 +284,8 @@ export default function ProgramDetailsPage({ params }) {
           sessionData={sessionData}
           handleSessionInputChange={handleSessionInputChange}
           handleSessionSubmit={handleSessionSubmit}
-          setShowCreateSessionModal={setShowCreateSessionModal}
+          onClose={() => setShowCreateSessionModal(false)}
+          editMode={false}
         />
       )}
     </main>

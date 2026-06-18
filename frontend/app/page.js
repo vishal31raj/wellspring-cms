@@ -34,6 +34,7 @@ export default function Home() {
         });
         toast.success(result.message);
         localStorage.setItem("token", result.token);
+        document.cookie = `token=${result.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax; Secure`;
         localStorage.setItem("c_id", result.c_id);
         router.push("/dashboard");
       } else {
@@ -45,7 +46,6 @@ export default function Home() {
         });
         toast.success(result.message);
         setIsLogin(true);
-        console.log("Registered:", result);
       }
     } catch (error) {
       toast.error(error.message);
