@@ -2,6 +2,7 @@ const express = require("express");
 const { body } = require("express-validator");
 
 const sessionController = require("../controllers/session.controller");
+const s3Controller = require("../utils/s3");
 
 const isAuthenticated = require("../middlewares/authentication.middleware");
 const isAuthorized = require("../middlewares/authorization.middleware");
@@ -67,6 +68,18 @@ router.delete(
   isAuthenticated,
   isAuthorized,
   sessionController.deleteSession,
+);
+
+router.post(
+  "/generateUploadUrl",
+  isAuthenticated,
+  isAuthorized,
+  [
+    body("fileName").trim().notEmpty().withMessage("Title is required"),
+    body("contentType").trim().notEmpty().withMessage("Title is required"),
+  ],
+  validate,
+  s3Controller.generateUploadUrl,
 );
 
 module.exports = router;
