@@ -9,6 +9,16 @@ const validate = require("../middlewares/req-validation.middleware");
 
 const router = express.Router();
 
+const reorderValidator = [
+  body()
+    .isArray({ min: 1 })
+    .withMessage("Request body must be a non-empty array"),
+
+  body("*.sessionId").isInt({ min: 1 }).withMessage("Invalid sessionId"),
+
+  body("*.newPosition").isInt({ min: 1 }).withMessage("Invalid newPosition"),
+];
+
 router.post(
   "/",
   isAuthenticated,
@@ -42,6 +52,14 @@ router.put(
   body("title").notEmpty().withMessage("Title is required"),
   validate,
   programController.updateProgram,
+);
+router.put(
+  "/:programId/reorder",
+  isAuthenticated,
+  isAuthorized,
+  reorderValidator,
+  validate,
+  programController.reorderSessions,
 );
 
 module.exports = router;

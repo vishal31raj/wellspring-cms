@@ -22,3 +22,48 @@ export async function createSession(programId, data) {
 
   return result;
 }
+
+export async function editSession(sessionId, data) {
+  const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("c_id");
+
+  const response = await fetch(`${BASE_URL}/sessions/${sessionId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      t_id: tenantId,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result;
+}
+
+export async function deleteSession(sessionId) {
+  const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("c_id");
+
+  const response = await fetch(`${BASE_URL}/sessions/${sessionId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      t_id: tenantId,
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result;
+}

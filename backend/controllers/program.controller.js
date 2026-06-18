@@ -1,6 +1,7 @@
 const { fn, col } = require("sequelize");
 const Program = require("../models/program.model");
 const Session = require("../models/session.model");
+const sequelize = require("../utils/database");
 
 exports.createProgram = async (req, res) => {
   try {
@@ -184,15 +185,15 @@ exports.reorderSessions = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const tenantId = req.tenantId;
+    const creatorId = req.tenantId;
     const { programId } = req.params;
-    const { sessions } = req.body;
+    const updates = req.body;
 
-    // Step 1: Verify program ownership
+    // 1. Validate program ownership
     const program = await Program.findOne({
       where: {
         id: programId,
-        creatorId: tenantId,
+        creatorId,
       },
       transaction,
     });
@@ -205,8 +206,27 @@ exports.reorderSessions = async (req, res) => {
       });
     }
 
-    // Step 2: Validate sequential positions
-    const positions = sessions.map((s) => s.position).sort((a, b) => a - b);
+    // 2. Validate all sessionIds belong to this program
+    const sessionIds = updates.map((item) => item.sessionId);
+
+    const sessions = await Session.findAll({
+      where: {
+        id: sessionIds,
+        programId,
+      },
+      transaction,
+    });
+
+    if (sessions.length !== updates.length) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "One or more sessions do not belong to this program",
+      });
+    }
+
+    // 3. Validate positions are unique & sequential
+    const positions = updates.map((x) => x.newPosition).sort((a, b) => a - b);
 
     for (let i = 0; i < positions.length; i++) {
       if (positions[i] !== i + 1) {
@@ -218,34 +238,31 @@ exports.reorderSessions = async (req, res) => {
       }
     }
 
-    // Step 3: Validate session ownership
-    const sessionIds = sessions.map((s) => s.id);
-
-    const dbSessions = await Session.findAll({
-      where: {
-        id: sessionIds,
-        programId,
-      },
-      transaction,
-    });
-
-    if (dbSessions.length !== sessions.length) {
-      await transaction.rollback();
-      return res.status(400).json({
-        success: false,
-        message: "One or more sessions do not belong to this program",
-      });
-    }
-
-    // Step 4: Update positions
-    for (const session of sessions) {
+    // 4. Temporary positions to avoid collisions
+    for (const item of updates) {
       await Session.update(
         {
-          position: session.position,
+          position: item.newPosition + 1000,
         },
         {
           where: {
-            id: session.id,
+            id: item.sessionId,
+            programId,
+          },
+          transaction,
+        },
+      );
+    }
+
+    // 5. Final positions
+    for (const item of updates) {
+      await Session.update(
+        {
+          position: item.newPosition,
+        },
+        {
+          where: {
+            id: item.sessionId,
             programId,
           },
           transaction,
@@ -261,6 +278,7 @@ exports.reorderSessions = async (req, res) => {
     });
   } catch (error) {
     await transaction.rollback();
+    console.error(error);
 
     return res.status(500).json({
       success: false,
