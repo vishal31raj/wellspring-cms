@@ -19,7 +19,7 @@ const Session = sequelize.define("session", {
   },
   position: {
     type: Sequelize.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   instructorName: {
     type: Sequelize.STRING,

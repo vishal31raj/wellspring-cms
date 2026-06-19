@@ -17,11 +17,11 @@ const sessionValidators = [
   //   .withMessage("Duration is required")
   //   .isInt({ min: 1 })
   //   .withMessage("Duration must be a positive integer (seconds)"),
-  body("position")
-    .notEmpty()
-    .withMessage("Position is required")
-    .isInt({ min: 1 })
-    .withMessage("Position must be a positive integer"),
+  // body("position")
+  //   .notEmpty()
+  //   .withMessage("Position is required")
+  //   .isInt({ min: 1 })
+  //   .withMessage("Position must be a positive integer"),
   body("instructorName").notEmpty().withMessage("Instructor name is required"),
   body("tags").optional().isArray().withMessage("Tags must be an array"),
   body("tags.*").optional().isString().withMessage("Each tag must be a string"),

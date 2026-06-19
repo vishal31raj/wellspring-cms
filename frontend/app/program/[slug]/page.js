@@ -31,7 +31,7 @@ export default function ProgramDetailsPage({ params }) {
   const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
   const [sessionData, setSessionData] = useState({
     title: "",
-    position: "",
+    // position: "",
     instructorName: "",
     tags: "", // This will take user text (e.g., "sleep, beginner") and transform to array on submit
   });
@@ -94,16 +94,16 @@ export default function ProgramDetailsPage({ params }) {
   const handleSessionSubmit = async (e) => {
     e.preventDefault();
 
-    if (Number(sessionData.position) !== sessions.length + 1) {
-      toast.error(`Position should be ${sessions.length + 1}`);
-      return;
-    }
+    // if (Number(sessionData.position) !== sessions.length + 1) {
+    //   toast.error(`Position should be ${sessions.length + 1}`);
+    //   return;
+    // }
 
     try {
       // Formats data payloads into corresponding requested schema types
       const payload = {
         title: sessionData.title,
-        position: Number(sessionData.position), // Ensures Integer conversion
+        // position: Number(sessionData.position), // Ensures Integer conversion
         instructorName: sessionData.instructorName,
         // Splits text string inputs by comma and strips white spaces cleanly
         tags: sessionData.tags
@@ -119,7 +119,7 @@ export default function ProgramDetailsPage({ params }) {
 
       setSessionData({
         title: "",
-        position: "",
+        // position: "",
         instructorName: "",
         tags: "",
       });

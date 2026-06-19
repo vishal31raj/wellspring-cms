@@ -6,8 +6,7 @@ exports.createSession = async (req, res) => {
   try {
     const tenantId = req.tenantId;
     const { programId } = req.params;
-
-    const { title, position, instructorName, tags } = req.body;
+    const { title, instructorName, tags } = req.body;
 
     const program = await Program.findOne({
       where: {
@@ -22,9 +21,14 @@ exports.createSession = async (req, res) => {
       });
     }
 
+    const sessionCount = await Session.count({
+      where: { programId },
+    });
+    const nextPosition = sessionCount + 1;
+
     const session = await Session.create({
       title,
-      position,
+      position: nextPosition,
       instructorName,
       tags,
       programId,
