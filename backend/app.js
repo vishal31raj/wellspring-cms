@@ -1,8 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config({ quiet: true });
-
-const sequelize = require("./utils/database");
 
 // Models
 const Creator = require("./models/creator.model");
@@ -33,15 +30,4 @@ app.use("/programs", programRoutes);
 app.use("/sessions", sessionRoutes);
 app.use("/audit", auditRoutes);
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("DB connected!");
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    const port = process.env.PORT || 8000;
-    console.log(`Backend is running on ${port}!`);
-    app.listen(port);
-  })
-  .catch((err) => console.log("Connection error!", err));
+module.exports = app;
