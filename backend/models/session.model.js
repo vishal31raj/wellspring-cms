@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../utils/database");
+const { deleteS3Object } = require("../utils/s3");
 
 const Session = sequelize.define("session", {
   id: {
@@ -14,7 +15,7 @@ const Session = sequelize.define("session", {
   },
   duration: {
     type: Sequelize.INTEGER, // in seconds
-    allowNull: false,
+    allowNull: true,
   },
   position: {
     type: Sequelize.INTEGER,
@@ -28,14 +29,24 @@ const Session = sequelize.define("session", {
     type: Sequelize.ARRAY(Sequelize.STRING),
     allowNull: true,
   },
+  s3Key: {
+    type: Sequelize.TEXT,
+    allowNull: true,
+  },
   mediaFileUrl: {
     type: Sequelize.TEXT,
-    allowNull: false,
+    allowNull: true,
   },
   type: {
     type: Sequelize.ENUM("audio", "video"),
-    allowNull: false,
+    allowNull: true,
   },
+});
+
+Session.addHook("beforeDestroy", async (session) => {
+  if (session.s3Key) {
+    await deleteS3Object(session.s3Key);
+  }
 });
 
 module.exports = Session;

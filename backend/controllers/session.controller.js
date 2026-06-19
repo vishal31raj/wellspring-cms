@@ -1,20 +1,13 @@
 const Program = require("../models/program.model");
 const Session = require("../models/session.model");
+const { getMediaPublicUrl, deleteS3Object } = require("../utils/s3");
 
 exports.createSession = async (req, res) => {
   try {
     const tenantId = req.tenantId;
     const { programId } = req.params;
 
-    const {
-      title,
-      duration,
-      position,
-      instructorName,
-      tags,
-      mediaFileUrl,
-      type,
-    } = req.body;
+    const { title, position, instructorName, tags } = req.body;
 
     const program = await Program.findOne({
       where: {
@@ -31,12 +24,9 @@ exports.createSession = async (req, res) => {
 
     const session = await Session.create({
       title,
-      duration,
       position,
       instructorName,
       tags,
-      mediaFileUrl,
-      type,
       programId,
     });
 
@@ -114,7 +104,12 @@ exports.updateSession = async (req, res) => {
       });
     }
 
-    await session.update(req.body);
+    const payload = { ...req.body };
+    if (payload.s3Key) {
+      payload.mediaFileUrl = getMediaPublicUrl(payload.s3Key);
+    }
+
+    await session.update(payload);
 
     return res.status(200).json({
       success: true,
@@ -150,6 +145,10 @@ exports.deleteSession = async (req, res) => {
         success: false,
         message: "Session not found",
       });
+    }
+
+    if (session.s3Key) {
+      await deleteS3Object(session.s3Key);
     }
 
     await session.destroy();

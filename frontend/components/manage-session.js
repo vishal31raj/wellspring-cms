@@ -40,7 +40,7 @@ export default function ManageSession({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
+            {/* <div>
               <label className="mb-0.5 block text-xs font-medium text-zinc-700">
                 Duration (in seconds)
               </label>
@@ -52,6 +52,20 @@ export default function ManageSession({
                 required
                 min="1"
                 placeholder="1500"
+                className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
+              />
+            </div> */}
+            <div>
+              <label className="mb-0.5 block text-xs font-medium text-zinc-700">
+                Instructor Name
+              </label>
+              <input
+                type="text"
+                name="instructorName"
+                value={sessionData.instructorName}
+                onChange={handleSessionInputChange}
+                required
+                placeholder="eg: Sarah Johnson"
                 className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
               />
             </div>
@@ -75,21 +89,6 @@ export default function ManageSession({
 
           <div>
             <label className="mb-0.5 block text-xs font-medium text-zinc-700">
-              Instructor Name
-            </label>
-            <input
-              type="text"
-              name="instructorName"
-              value={sessionData.instructorName}
-              onChange={handleSessionInputChange}
-              required
-              placeholder="eg: Sarah Johnson"
-              className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600"
-            />
-          </div>
-
-          <div>
-            <label className="mb-0.5 block text-xs font-medium text-zinc-700">
               Tags (comma separated)
             </label>
             <input
@@ -102,7 +101,7 @@ export default function ManageSession({
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="mb-0.5 block text-xs font-medium text-zinc-700">
               Media File URL
             </label>
@@ -130,7 +129,7 @@ export default function ManageSession({
               <option value="video">Video</option>
               <option value="audio">Audio</option>
             </select>
-          </div>
+          </div> */}
 
           <div className="flex justify-end gap-3 pt-3 border-t mt-4">
             <button

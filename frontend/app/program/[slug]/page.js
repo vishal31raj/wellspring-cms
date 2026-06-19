@@ -31,12 +31,9 @@ export default function ProgramDetailsPage({ params }) {
   const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
   const [sessionData, setSessionData] = useState({
     title: "",
-    duration: "",
     position: "",
     instructorName: "",
     tags: "", // This will take user text (e.g., "sleep, beginner") and transform to array on submit
-    mediaFileUrl: "",
-    type: "video", // Default value for the dropdown
   });
 
   const fetchProgramDetails = async () => {
@@ -106,7 +103,6 @@ export default function ProgramDetailsPage({ params }) {
       // Formats data payloads into corresponding requested schema types
       const payload = {
         title: sessionData.title,
-        duration: Number(sessionData.duration), // Ensures Integer conversion
         position: Number(sessionData.position), // Ensures Integer conversion
         instructorName: sessionData.instructorName,
         // Splits text string inputs by comma and strips white spaces cleanly
@@ -116,8 +112,6 @@ export default function ProgramDetailsPage({ params }) {
               .map((tag) => tag.trim())
               .filter(Boolean)
           : [],
-        mediaFileUrl: sessionData.mediaFileUrl,
-        type: sessionData.type,
       };
 
       const result = await createSession(slug, payload);
@@ -125,12 +119,9 @@ export default function ProgramDetailsPage({ params }) {
 
       setSessionData({
         title: "",
-        duration: "",
         position: "",
         instructorName: "",
         tags: "",
-        mediaFileUrl: "",
-        type: "video",
       });
       setShowCreateSessionModal(false);
       await fetchProgramDetails();
@@ -167,7 +158,7 @@ export default function ProgramDetailsPage({ params }) {
   };
 
   return (
-    <main className="p-5">
+    <main className="py-5 px-16">
       {programDetails && (
         <div className="flex flex-row items-center justify-between mb-6">
           <button
@@ -210,6 +201,7 @@ export default function ProgramDetailsPage({ params }) {
                   {sessions.map((session) => (
                     <SessionCard
                       key={session.id}
+                      programId={programDetails.id}
                       session={session}
                       updateSessionEvent={async () =>
                         await fetchProgramDetails()

@@ -2,6 +2,7 @@ const { fn, col } = require("sequelize");
 const Program = require("../models/program.model");
 const Session = require("../models/session.model");
 const sequelize = require("../utils/database");
+const { deleteMultipleS3Objects } = require("../utils/s3");
 
 exports.createProgram = async (req, res) => {
   try {
@@ -81,9 +82,9 @@ exports.getProgramDetails = async (req, res) => {
         {
           model: Session,
           as: "sessions",
-          order: [["position", "ASC"]],
         },
       ],
+      order: [[{ model: Session, as: "sessions" }, "position", "ASC"]],
     });
 
     if (!program) {
@@ -163,6 +164,17 @@ exports.deleteProgram = async (req, res) => {
         success: false,
         message: "Program not found",
       });
+    }
+
+    const sessions = await Session.findAll({
+      where: { programId: id },
+      attributes: ["id", "s3Key"],
+    });
+
+    const keys = sessions.map((session) => session.s3Key).filter(Boolean);
+
+    if (keys.length) {
+      await deleteMultipleS3Objects(keys);
     }
 
     await program.destroy();

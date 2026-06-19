@@ -12,11 +12,11 @@ const router = express.Router();
 
 const sessionValidators = [
   body("title").trim().notEmpty().withMessage("Title is required"),
-  body("duration")
-    .notEmpty()
-    .withMessage("Duration is required")
-    .isInt({ min: 1 })
-    .withMessage("Duration must be a positive integer (seconds)"),
+  // body("duration")
+  //   .notEmpty()
+  //   .withMessage("Duration is required")
+  //   .isInt({ min: 1 })
+  //   .withMessage("Duration must be a positive integer (seconds)"),
   body("position")
     .notEmpty()
     .withMessage("Position is required")
@@ -25,17 +25,17 @@ const sessionValidators = [
   body("instructorName").notEmpty().withMessage("Instructor name is required"),
   body("tags").optional().isArray().withMessage("Tags must be an array"),
   body("tags.*").optional().isString().withMessage("Each tag must be a string"),
-  body("mediaFileUrl")
-    .trim()
-    .notEmpty()
-    .withMessage("Media file URL is required")
-    .isURL()
-    .withMessage("Media file URL must be valid"),
-  body("type")
-    .notEmpty()
-    .withMessage("Type is required")
-    .isIn(["audio", "video"])
-    .withMessage("Type must be either audio or video"),
+  // body("mediaFileUrl")
+  //   .trim()
+  //   .notEmpty()
+  //   .withMessage("Media file URL is required")
+  //   .isURL()
+  //   .withMessage("Media file URL must be valid"),
+  // body("type")
+  //   .notEmpty()
+  //   .withMessage("Type is required")
+  //   .isIn(["audio", "video"])
+  //   .withMessage("Type must be either audio or video"),
 ];
 
 router.post(
@@ -71,12 +71,16 @@ router.delete(
 );
 
 router.post(
-  "/generateUploadUrl",
+  "/generateUploadUrl/:programId/:sessionId",
   isAuthenticated,
   isAuthorized,
   [
-    body("fileName").trim().notEmpty().withMessage("Title is required"),
-    body("contentType").trim().notEmpty().withMessage("Title is required"),
+    body("fileName").trim().notEmpty().withMessage("File name is required"),
+    body("fileSize").trim().notEmpty().withMessage("File size is required"),
+    body("contentType")
+      .trim()
+      .notEmpty()
+      .withMessage("Content type is required"),
   ],
   validate,
   s3Controller.generateUploadUrl,
