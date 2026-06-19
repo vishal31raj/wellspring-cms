@@ -13,4 +13,6 @@ router.get("/getProfile", isAuthenticated, authController.getProfile);
 
 router.patch("/changePassword", isAuthenticated, authController.changePassword);
 
+router.post("/logout", isAuthenticated, authController.logout);
+
 module.exports = router;

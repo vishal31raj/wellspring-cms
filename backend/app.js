@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config({ quiet: true });
 
-const sequelize = require("./utils/database");
+const requestContext = require("./middlewares/request-context");
+const logger = require("./utils/logger");
 
 // Models
 const Creator = require("./models/creator.model");
@@ -14,6 +14,7 @@ require("./models/associations");
 const authRoutes = require("./routes/auth.routes");
 const programRoutes = require("./routes/program.routes");
 const sessionRoutes = require("./routes/session.routes");
+const auditRoutes = require("./routes/audit.routes");
 
 const app = express();
 
@@ -27,19 +28,32 @@ app.use(
 
 app.use(express.json());
 
+app.use(requestContext);
+
+app.use((req, res, next) => {
+  logger.info({
+    message: "Incoming request",
+    method: req.method,
+    path: req.originalUrl,
+    request_id: req.requestId,
+    tenant_id: req.tenantId || null,
+  });
+
+  res.on("finish", () => {
+    logger.info({
+      message: "Request completed",
+      status_code: res.statusCode,
+      request_id: req.requestId,
+      tenant_id: req.tenantId || null,
+    });
+  });
+
+  next();
+});
+
 app.use("/auth", authRoutes);
 app.use("/programs", programRoutes);
 app.use("/sessions", sessionRoutes);
+app.use("/audit", auditRoutes);
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("DB connected!");
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    const port = process.env.PORT || 8000;
-    console.log(`Backend is running on ${port}!`);
-    app.listen(port);
-  })
-  .catch((err) => console.log("Connection error!", err));
+module.exports = app;

@@ -19,6 +19,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import ManageSession from "@/components/manage-session";
+import { FaUpload } from "react-icons/fa";
+import BulkUploadModal from "@/components/bulk-upload-sessions";
 
 export default function ProgramDetailsPage({ params }) {
   const router = useRouter();
@@ -31,12 +33,9 @@ export default function ProgramDetailsPage({ params }) {
   const [showCreateSessionModal, setShowCreateSessionModal] = useState(false);
   const [sessionData, setSessionData] = useState({
     title: "",
-    duration: "",
-    position: "",
+    // position: "",
     instructorName: "",
     tags: "", // This will take user text (e.g., "sleep, beginner") and transform to array on submit
-    mediaFileUrl: "",
-    type: "video", // Default value for the dropdown
   });
 
   const fetchProgramDetails = async () => {
@@ -97,17 +96,16 @@ export default function ProgramDetailsPage({ params }) {
   const handleSessionSubmit = async (e) => {
     e.preventDefault();
 
-    if (Number(sessionData.position) !== sessions.length + 1) {
-      toast.error(`Position should be ${sessions.length + 1}`);
-      return;
-    }
+    // if (Number(sessionData.position) !== sessions.length + 1) {
+    //   toast.error(`Position should be ${sessions.length + 1}`);
+    //   return;
+    // }
 
     try {
       // Formats data payloads into corresponding requested schema types
       const payload = {
         title: sessionData.title,
-        duration: Number(sessionData.duration), // Ensures Integer conversion
-        position: Number(sessionData.position), // Ensures Integer conversion
+        // position: Number(sessionData.position), // Ensures Integer conversion
         instructorName: sessionData.instructorName,
         // Splits text string inputs by comma and strips white spaces cleanly
         tags: sessionData.tags
@@ -116,8 +114,6 @@ export default function ProgramDetailsPage({ params }) {
               .map((tag) => tag.trim())
               .filter(Boolean)
           : [],
-        mediaFileUrl: sessionData.mediaFileUrl,
-        type: sessionData.type,
       };
 
       const result = await createSession(slug, payload);
@@ -125,12 +121,9 @@ export default function ProgramDetailsPage({ params }) {
 
       setSessionData({
         title: "",
-        duration: "",
-        position: "",
+        // position: "",
         instructorName: "",
         tags: "",
-        mediaFileUrl: "",
-        type: "video",
       });
       setShowCreateSessionModal(false);
       await fetchProgramDetails();
@@ -167,7 +160,7 @@ export default function ProgramDetailsPage({ params }) {
   };
 
   return (
-    <main className="p-5">
+    <main className="py-5 px-16">
       {programDetails && (
         <div className="flex flex-row items-center justify-between mb-6">
           <button
@@ -210,6 +203,7 @@ export default function ProgramDetailsPage({ params }) {
                   {sessions.map((session) => (
                     <SessionCard
                       key={session.id}
+                      programId={programDetails.id}
                       session={session}
                       updateSessionEvent={async () =>
                         await fetchProgramDetails()
@@ -224,13 +218,17 @@ export default function ProgramDetailsPage({ params }) {
               <p className="text-sm text-zinc-500 mb-3">No sessions yet!</p>
             </div>
           )}
-          <div className="text-center my-3">
+          <div className="flex items-center justify-center gap-3 my-3">
             <button
               onClick={() => setShowCreateSessionModal(true)}
               className="px-3 rounded-md border-1 border-dashed border-blue-600 bg-transparent py-2 text-blue-600 text-sm hover:bg-blue-50 transition-colors"
             >
               + Create new session
             </button>
+            <BulkUploadModal
+              programId={programDetails.id} // Or dynamically from sessionDetails.programId
+              onUploadSuccess={() => fetchProgramDetails()}
+            />
           </div>
         </div>
       )}

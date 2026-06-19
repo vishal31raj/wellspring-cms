@@ -2,7 +2,7 @@
 
 import toast from "react-hot-toast";
 
-import { changePassword, getProfile } from "@/services/auth.api";
+import { changePassword, getProfile, logout } from "@/services/auth.api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProgram, getPrograms } from "@/services/programs.api";
@@ -38,11 +38,17 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("c_id");
-    localStorage.removeItem("token");
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      const result = await logout();
+      toast.success(result.message);
+      localStorage.removeItem("c_id");
+      localStorage.removeItem("token");
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      router.push("/");
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handlePasswordChange = (e) => {
@@ -90,6 +96,13 @@ export default function DashboardPage() {
         <div className="flex flex-row items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Welcome {profile.name}!</h1>
           <div className="flex flex-row items-center gap-3 whitespace-nowrap">
+            <button
+              onClick={() => router.push("/audit")}
+              className="px-3 rounded-md border-1 border-blue-600 bg-white py-2 text-blue-600 text-sm hover:bg-blue-200 mr-6"
+            >
+              View Audit logs
+            </button>
+
             <button
               onClick={() => setShowPasswordModal(true)}
               className="px-3 rounded-md bg-blue-600 py-2 text-white text-sm hover:bg-blue-700"

@@ -1,4 +1,9 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
+} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 require("dotenv").config({ quiet: true });
@@ -14,10 +19,50 @@ const s3 = new S3Client({
 const EXPIRES_IN = 60; // seconds
 
 exports.generateUploadUrl = async (req, res) => {
-  try {
-    const { fileName, contentType } = req.body;
+  const Session = require("../models/session.model");
+  const Program = require("../models/program.model");
 
-    const key = `sessions/${Date.now()}-${fileName}`;
+  try {
+    const { fileName, fileSize, contentType } = req.body;
+    const { programId, sessionId } = req.params;
+    const creatorId = req.creator.id;
+
+    const session = await Session.findOne({
+      where: {
+        id: sessionId,
+        programId: programId,
+      },
+      include: [
+        {
+          model: Program,
+          as: "program",
+          where: {
+            creatorId,
+          },
+          attributes: [],
+        },
+      ],
+    });
+    if (!session) {
+      return res.status(403).json({
+        message: "Unauthorized session!",
+      });
+    }
+
+    const allowedTypes = ["video/mp4", "audio/mpeg", "audio/wav"];
+    if (!allowedTypes.includes(contentType)) {
+      return res.status(400).json({
+        message: "Invalid file type",
+      });
+    }
+
+    if (fileSize > 500 * 1024 * 1024) {
+      return res.status(400).json({
+        message: "File too large",
+      });
+    }
+
+    const key = `sessions/creator-${creatorId}/program-${programId}/session-${sessionId}/${Date.now()}-${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.S3_BUCKET,
@@ -38,6 +83,34 @@ exports.generateUploadUrl = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Failed to generate URL" });
+    res.status(500).json({ message: "Failed to generate URL", error: err });
   }
+};
+
+exports.deleteS3Object = async (key) => {
+  if (!key) return;
+
+  const command = new DeleteObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: key,
+  });
+
+  await s3.send(command);
+};
+
+exports.deleteMultipleS3Objects = async (keys = []) => {
+  if (!keys.length) return;
+
+  const command = new DeleteObjectsCommand({
+    Bucket: process.env.S3_BUCKET,
+    Delete: {
+      Objects: keys.map((key) => ({ Key: key })),
+    },
+  });
+
+  await s3.send(command);
+};
+
+exports.getMediaPublicUrl = (key) => {
+  return `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };

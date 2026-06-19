@@ -9,5 +9,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/dashboard", "/program/:path*"],
+  matcher: ["/dashboard", "/audit", "/program/:path*"],
 };
