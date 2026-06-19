@@ -44,8 +44,6 @@ const Session = sequelize.define("session", {
   clientRefId: {
     type: Sequelize.STRING,
     allowNull: true,
-    // Optionally add a unique constraint scoped per program if needed:
-    // unique: 'compositeIndex'
   },
 });
 
