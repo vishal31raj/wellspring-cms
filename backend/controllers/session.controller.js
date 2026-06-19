@@ -3,6 +3,7 @@ const Session = require("../models/session.model");
 const { getMediaPublicUrl, deleteS3Object } = require("../utils/s3");
 const csv = require("fast-csv");
 const sequelize = require("../utils/database");
+const { logAction } = require("../utils/audit");
 
 exports.createSession = async (req, res) => {
   try {
@@ -36,9 +37,11 @@ exports.createSession = async (req, res) => {
       programId,
     });
 
+    await logAction(tenantId, "CREATE", "Session", session.id);
+
     return res.status(201).json({
       success: true,
-      data: session,
+      message: "Session created successfully!",
     });
   } catch (err) {
     console.error(err);
@@ -128,6 +131,8 @@ exports.updateSession = async (req, res) => {
       }
     }
 
+    await logAction(tenantId, "UPDATE", "Session", session.id);
+
     return res.status(200).json({
       success: true,
       message: "Session updated successfully",
@@ -168,7 +173,8 @@ exports.deleteSession = async (req, res) => {
       await deleteS3Object(session.s3Key);
     }
 
-    await session.destroy();
+    const deletedSession = await session.destroy();
+    await logAction(tenantId, "DELETE", "Session", deletedSession.id);
 
     return res.status(200).json({
       success: true,
@@ -307,6 +313,8 @@ exports.bulkImportSessions = async (req, res) => {
 
     // Commit all successful modifications
     await transaction.commit();
+
+    await logAction(tenantId, "BULK_CREATE", "Program", programId);
 
     return res.status(200).json({
       success: true,

@@ -74,3 +74,23 @@ export async function getProfile() {
 
   return result;
 }
+
+export async function logout() {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${BASE_URL}/auth/logout`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({}),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Login failed");
+  }
+
+  return result;
+}

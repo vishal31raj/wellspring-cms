@@ -4,6 +4,7 @@ const crypto = require("crypto");
 require("dotenv").config({ quiet: true });
 
 const Creator = require("../../models/creator.model");
+const { logAction } = require("../../utils/audit");
 
 exports.signup = async (req, res) => {
   try {
@@ -26,6 +27,8 @@ exports.signup = async (req, res) => {
       email,
       password: hashedPassword,
     });
+
+    await logAction(creator.id, "REGISTER", "Auth", creator.id);
 
     res.status(201).json({
       message: "Signup successful",
@@ -66,6 +69,8 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
+
+    await logAction(creator.id, "LOGIN", "Auth", creator.id);
 
     res.status(200).json({
       message: "Login successful",
@@ -130,12 +135,31 @@ exports.changePassword = async (req, res) => {
 
     await creator.save();
 
+    await logAction(creator.id, "UPDATE", "Password", creator.id);
+
     return res.status(200).json({
       message: "Password updated successfully",
     });
   } catch (err) {
     return res.status(500).json({
       error: err.message,
+    });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    await logAction(req.creator.id, "LOGOUT", "Auth", req.creator.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logout successful!",
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error during logout",
     });
   }
 };

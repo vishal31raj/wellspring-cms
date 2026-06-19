@@ -3,6 +3,7 @@ const Program = require("../models/program.model");
 const Session = require("../models/session.model");
 const sequelize = require("../utils/database");
 const { deleteMultipleS3Objects } = require("../utils/s3");
+const { logAction } = require("../utils/audit");
 
 exports.createProgram = async (req, res) => {
   try {
@@ -20,6 +21,8 @@ exports.createProgram = async (req, res) => {
       title: title.trim(),
       creatorId,
     });
+
+    await logAction(creatorId, "CREATE", "Program", program.id);
 
     return res.status(201).json({
       success: true,
@@ -133,6 +136,8 @@ exports.updateProgram = async (req, res) => {
 
     await program.save();
 
+    await logAction(creatorId, "UPDATE", "Program", program.id);
+
     return res.status(200).json({
       success: true,
       message: "Program updated successfully",
@@ -177,7 +182,8 @@ exports.deleteProgram = async (req, res) => {
       await deleteMultipleS3Objects(keys);
     }
 
-    await program.destroy();
+    const deletedProgram = await program.destroy();
+    await logAction(creatorId, "DELETE", "Program", deletedProgram.id);
 
     return res.status(200).json({
       success: true,
@@ -283,6 +289,8 @@ exports.reorderSessions = async (req, res) => {
     }
 
     await transaction.commit();
+
+    await logAction(creatorId, "REORDER", "Sessions", program.id);
 
     return res.status(200).json({
       success: true,
