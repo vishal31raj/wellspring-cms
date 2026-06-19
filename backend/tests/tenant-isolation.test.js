@@ -5,6 +5,7 @@ const Creator = require("../models/creator.model");
 const sequelize = require("../utils/database");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { execSync } = require("child_process");
 
 async function createTenant() {
   const hashedPassword = await bcrypt.hash("password123", 10);
@@ -31,10 +32,12 @@ function generateToken(tenantInstance) {
 
 describe("Tenant Isolation Constraints", () => {
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    execSync("npx sequelize-cli db:migrate:undo:all --env test");
+    execSync("npx sequelize-cli db:migrate --env test");
   });
 
   afterAll(async () => {
+    execSync("npx sequelize-cli db:migrate:undo:all --env test");
     await sequelize.close();
   });
 

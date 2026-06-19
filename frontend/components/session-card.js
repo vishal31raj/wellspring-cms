@@ -7,10 +7,7 @@ import VideoThumbnail from "./video-thumbnail";
 import { FaAngleRight, FaGripVertical } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
-export default function SessionCard({
-  programId,
-  session,
-}) {
+export default function SessionCard({ programId, session }) {
   const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: session.id });
@@ -19,8 +16,6 @@ export default function SessionCard({
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
-  
 
   return (
     <div
@@ -54,16 +49,18 @@ export default function SessionCard({
               </span>
             </p>
 
-            <p className="text-sm text-zinc-500">
-              {session.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 rounded-lg bg-zinc-400 py-1 text-white text-sm mr-2"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </p>
+            {session.tags && (
+              <p className="text-sm text-zinc-500">
+                {session.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 rounded-lg bg-zinc-400 py-1 text-white text-sm mr-2"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </p>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <button

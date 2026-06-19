@@ -153,16 +153,18 @@ export default function SessionDetailsPage({ params }) {
                   {formatDateTime(sessionDetails.updatedAt)}
                 </p>
 
-                <p className="text-sm text-zinc-500">
-                  {sessionDetails.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 rounded-lg bg-zinc-400 py-1 text-white text-sm mr-2"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </p>
+                {sessionDetails.tags && (
+                  <p className="text-sm text-zinc-500">
+                    {sessionDetails.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 rounded-lg bg-zinc-400 py-1 text-white text-sm mr-2"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </p>
+                )}
               </div>
             </div>
           </div>
