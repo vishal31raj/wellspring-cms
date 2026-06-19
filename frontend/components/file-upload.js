@@ -5,7 +5,13 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FaUpload } from "react-icons/fa";
 
-export default function FileUpload({ session, width, height, onFileUpload }) {
+export default function FileUpload({
+  session,
+  width,
+  height,
+  btnTitle = "Upload",
+  onFileUpload,
+}) {
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -125,7 +131,7 @@ export default function FileUpload({ session, width, height, onFileUpload }) {
         onClick={handleButtonClick}
         className="px-3 rounded-md bg-blue-600 py-2 text-white text-sm hover:bg-blue-700 flex items-center gap-2"
       >
-        <FaUpload /> Upload
+        <FaUpload /> {btnTitle}
       </button>
 
       {showModal && (

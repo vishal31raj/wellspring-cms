@@ -114,3 +114,36 @@ export async function generateUploadUrl(data, programId, sessionId) {
 
   return result;
 }
+
+export async function bulkUploadSessions(programId, formData) {
+  const token = localStorage.getItem("token");
+  const tenantId = localStorage.getItem("c_id");
+
+  const response = await fetch(
+    `${BASE_URL}/sessions/programs/${programId}/bulkImport`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        t_id: tenantId,
+      },
+      body: formData,
+    },
+  );
+
+  let result;
+  const contentType = response.headers.get("content-type");
+
+  if (contentType && contentType.includes("application/json")) {
+    result = await response.json();
+  } else {
+    const rawText = await response.text();
+    result = { message: rawText || "An unexpected server error occurred." };
+  }
+
+  if (!response.ok) {
+    throw new Error(result.message || "Bulk import failed.");
+  }
+
+  return result;
+}

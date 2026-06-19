@@ -3,6 +3,7 @@ import {
   FaFileAudio,
   FaFileVideo,
   FaExclamationTriangle,
+  FaEdit,
 } from "react-icons/fa";
 
 export default function VideoThumbnail({
@@ -11,6 +12,8 @@ export default function VideoThumbnail({
   type = "video",
   width = "150px",
   height = "100px",
+  showEdit = false,
+  onEditMedia
 }) {
   return (
     <div
@@ -31,9 +34,16 @@ export default function VideoThumbnail({
       )}
 
       {url && (
-        <div className="absolute bottom-1 right-1 rounded px-1.5 py-0.5 text-xs text-zinc-500">
-          {formatSecondsToTime(duration)}
-        </div>
+        <>
+          {showEdit && (
+            <button onClick={onEditMedia} className="absolute bottom-1 left-1 rounded-md bg-white p-2 text-sm text-blue-600 hover:bg-blue-200">
+              <FaEdit />
+            </button>
+          )}
+          <div className="absolute bottom-1 right-1 rounded px-1.5 py-0.5 text-xs text-zinc-500">
+            {formatSecondsToTime(duration)}
+          </div>
+        </>
       )}
     </div>
   );

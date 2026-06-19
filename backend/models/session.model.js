@@ -41,6 +41,12 @@ const Session = sequelize.define("session", {
     type: Sequelize.ENUM("audio", "video"),
     allowNull: true,
   },
+  clientRefId: {
+    type: Sequelize.STRING,
+    allowNull: true,
+    // Optionally add a unique constraint scoped per program if needed:
+    // unique: 'compositeIndex'
+  },
 });
 
 Session.addHook("beforeDestroy", async (session) => {

@@ -19,6 +19,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import ManageSession from "@/components/manage-session";
+import { FaUpload } from "react-icons/fa";
+import BulkUploadModal from "@/components/bulk-upload-sessions";
 
 export default function ProgramDetailsPage({ params }) {
   const router = useRouter();
@@ -216,13 +218,17 @@ export default function ProgramDetailsPage({ params }) {
               <p className="text-sm text-zinc-500 mb-3">No sessions yet!</p>
             </div>
           )}
-          <div className="text-center my-3">
+          <div className="flex items-center justify-center gap-3 my-3">
             <button
               onClick={() => setShowCreateSessionModal(true)}
               className="px-3 rounded-md border-1 border-dashed border-blue-600 bg-transparent py-2 text-blue-600 text-sm hover:bg-blue-50 transition-colors"
             >
               + Create new session
             </button>
+            <BulkUploadModal
+              programId={programDetails.id} // Or dynamically from sessionDetails.programId
+              onUploadSuccess={() => fetchProgramDetails()}
+            />
           </div>
         </div>
       )}

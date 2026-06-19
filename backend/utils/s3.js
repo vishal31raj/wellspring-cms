@@ -83,8 +83,7 @@ exports.generateUploadUrl = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to generate URL" });
+    res.status(500).json({ message: "Failed to generate URL", error: err });
   }
 };
 

@@ -26,6 +26,10 @@ export default function SessionDetailsPage({ params }) {
     tags: "",
   });
 
+  const handleEditMedia = () => {
+    setSessionDetails((prev) => ({ ...prev, mediaFileUrl: null }));
+  };
+
   const handleOpenEditSessionModal = () => {
     setSessionData({
       title: sessionDetails.title || "",
@@ -76,7 +80,6 @@ export default function SessionDetailsPage({ params }) {
   const fetchSessionDetails = async () => {
     try {
       const result = await getSessionDetails(sessionSlug);
-      console.log("Session details:", result.data);
       setSessionDetails(result.data);
     } catch (error) {
       toast.error(error.message);
@@ -125,6 +128,8 @@ export default function SessionDetailsPage({ params }) {
                     type={sessionDetails.type}
                     width="300px"
                     height="200px"
+                    showEdit={true}
+                    onEditMedia={handleEditMedia}
                   />
                 ) : (
                   <FileUpload
