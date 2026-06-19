@@ -173,8 +173,9 @@ exports.deleteSession = async (req, res) => {
       await deleteS3Object(session.s3Key);
     }
 
-    const deletedSession = await session.destroy();
-    await logAction(tenantId, "DELETE", "Session", deletedSession.id);
+    const sessionIdToDelete = session.id;
+    await session.destroy();
+    await logAction(tenantId, "DELETE", "Session", sessionIdToDelete);
 
     return res.status(200).json({
       success: true,

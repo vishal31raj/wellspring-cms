@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 
+const requestContext = require("./middlewares/request-context");
+const logger = require("./utils/logger");
+
 // Models
 const Creator = require("./models/creator.model");
 const Program = require("./models/program.model");
@@ -24,6 +27,29 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(requestContext);
+
+app.use((req, res, next) => {
+  logger.info({
+    message: "Incoming request",
+    method: req.method,
+    path: req.originalUrl,
+    request_id: req.requestId,
+    tenant_id: req.tenantId || null,
+  });
+
+  res.on("finish", () => {
+    logger.info({
+      message: "Request completed",
+      status_code: res.statusCode,
+      request_id: req.requestId,
+      tenant_id: req.tenantId || null,
+    });
+  });
+
+  next();
+});
 
 app.use("/auth", authRoutes);
 app.use("/programs", programRoutes);

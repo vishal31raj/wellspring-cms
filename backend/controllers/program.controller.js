@@ -182,8 +182,9 @@ exports.deleteProgram = async (req, res) => {
       await deleteMultipleS3Objects(keys);
     }
 
-    const deletedProgram = await program.destroy();
-    await logAction(creatorId, "DELETE", "Program", deletedProgram.id);
+    const programIdToDelete = program.id;
+    await program.destroy();
+    await logAction(creatorId, "DELETE", "Program", programIdToDelete);
 
     return res.status(200).json({
       success: true,
